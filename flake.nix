@@ -54,6 +54,14 @@
         ];
       };
 
+      nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
+        specialArgs = { inherit inputs; };
+        modules = [
+          ./hosts/thinkpad/configuration.nix
+          inputs.home-manager.nixosModules.home-manager
+        ];
+      };
+
       # Servers
       nixosConfigurations.dopey = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
