@@ -35,6 +35,11 @@
     xwayland.enable = true;
   };
 
+  # Autologin
+  services.greetd = {
+    enable = true;
+  };
+
   # Home Manager
   home-manager = {
     extraSpecialArgs = { inherit inputs; };
