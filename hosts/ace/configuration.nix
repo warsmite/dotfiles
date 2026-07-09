@@ -11,6 +11,11 @@
     ../../common.nix
   ];
 
+  # temp
+  nixpkgs.config.permittedInsecurePackages = [
+    "docker-28.5.2"
+  ];
+
   # Boot
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -98,9 +103,7 @@
   };
 
   # Virtualisation
-  virtualisation.containerd.enable = true;
   virtualisation.docker.enable = true;
-  virtualisation.podman.enable = true;
   users.users.warsmite.extraGroups = [
     "wheel"
     "docker"
@@ -171,107 +174,6 @@
     ACTION=="add|change", KERNEL=="nvme[0-9]*", ATTR{queue/scheduler}="kyber"
   '';
 
-  # Thermal / crash diagnostics
-  # 1 Hz trace of CPU/GPU temps, clocks, and power to /var/log/thermal-trace.log.
-  # Each line is fsync'd so the state immediately before a hard-freeze survives
-  # the power-off. Tail the log with: `tail -n 20 /var/log/thermal-trace.log | jq`.
-  systemd.services.thermal-trace = {
-    description = "1 Hz thermal/power trace for hard-freeze diagnosis";
-    wantedBy = [ "multi-user.target" ];
-    after = [ "multi-user.target" ];
-    path = [ pkgs.amdgpu_top ];
-    serviceConfig = {
-      Type = "simple";
-      Restart = "always";
-      RestartSec = "5s";
-      Nice = 10;
-      ExecStart = "${pkgs.writers.writePython3 "thermal-trace" {
-        flakeIgnore = [ "E241" "E302" "E305" "E501" "E701" ];
-      } ''
-        import json
-        import os
-        import subprocess
-        import time
-        from datetime import datetime
-
-        LOG = "/var/log/thermal-trace.log"
-        MAX_BYTES = 20 * 1024 * 1024  # rotate at 20 MiB
-
-        def sample():
-            try:
-                out = subprocess.run(
-                    ["amdgpu_top", "--json", "--dump"],
-                    capture_output=True, text=True, timeout=5,
-                )
-                d = json.loads(out.stdout)[0]
-            except Exception as e:
-                return {"error": str(e)}
-
-            sensors = d.get("Sensors") or {}
-            metrics = d.get("gpu_metrics") or {}
-            activity = d.get("gpu_activity") or {}
-
-            def sv(key):
-                v = sensors.get(key)
-                return v.get("value") if isinstance(v, dict) else None
-
-            def t100(key):
-                v = metrics.get(key)
-                return round(v / 100.0, 1) if v else None
-
-            cores_t = [c / 100.0 for c in (metrics.get("temperature_core") or []) if c]
-            cores_w = [w for w in (metrics.get("average_core_power") or []) if w]
-
-            return {
-                "cpu_tctl":  sv("CPU Tctl"),
-                "edge":      sv("Edge Temperature"),
-                "soc_t":     t100("temperature_soc"),
-                "gfx_t":     t100("temperature_gfx"),
-                "l3_t":      t100("temperature_l3"),
-                "core_max":  round(max(cores_t), 1) if cores_t else None,
-                "sclk":      sv("GFX_SCLK"),
-                "mclk":      sv("GFX_MCLK"),
-                "fclk":      sv("FCLK"),
-                "socket_w":  sv("Input Power"),
-                "gfx_w":     sv("GFX Power"),
-                "gfx_busy":  (activity.get("GFX") or {}).get("value"),
-                "core_w_mW_sum": sum(cores_w) if cores_w else None,
-            }
-
-        def rotate(path):
-            try:
-                if os.path.getsize(path) > MAX_BYTES:
-                    os.replace(path, path + ".1")
-            except FileNotFoundError:
-                pass
-
-        def main():
-            rotate(LOG)
-            fd = os.open(LOG, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o644)
-            try:
-                while True:
-                    row = {"t": datetime.now().astimezone().isoformat(timespec="seconds"),
-                           **sample()}
-                    os.write(fd, (json.dumps(row) + "\n").encode())
-                    os.fsync(fd)
-                    time.sleep(1.0)
-                    try:
-                        if os.fstat(fd).st_size > MAX_BYTES:
-                            os.close(fd)
-                            rotate(LOG)
-                            fd = os.open(LOG, os.O_WRONLY | os.O_CREAT | os.O_APPEND, 0o644)
-                    except Exception:
-                        pass
-            finally:
-                try: os.close(fd)
-                except Exception: pass
-
-        if __name__ == "__main__":
-            main()
-      ''}";
-    };
-  };
-
   # TDP cap via ryzenadj — prevents thermal runaway on the F7A's cooling.
   # Observed: stock BIOS lets cores hit 94.4°C (Tjmax=95). These limits
   # pull sustained power back enough to keep core_max under ~85°C.
@@ -286,8 +188,6 @@
       ExecStart = "${pkgs.ryzenadj}/bin/ryzenadj --stapm-limit=40000 --fast-limit=50000 --slow-limit=42000 --tctl-temp=85";
     };
   };
-
-  services.flatpak.enable = true;
 
   environment.systemPackages = with pkgs; [
     # Star Citizen
@@ -307,7 +207,6 @@
     rocmPackages_6.rocm-smi
     rocmPackages_6.rocminfo
     pkgs-unstable.llama-cpp-vulkan
-    whisper-cpp-vulkan
 
     (writeShellScriptBin "llama-switch" ''
       set -euo pipefail

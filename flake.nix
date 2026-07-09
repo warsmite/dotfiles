@@ -18,7 +18,6 @@
     gjq.url = "github:warsmite/gjq";
     gamejanitor.url = "github:warsmite/GameJanitor";
 
-    nanocoder.url = "github:Nano-Collective/nanocoder";
     claude-code.url = "github:sadjow/claude-code-nix";
 
     nix-citizen.url = "github:LovingMelody/nix-citizen";
@@ -72,7 +71,13 @@
       };
 
       nixosConfigurations.grumpy = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
+        specialArgs = {
+          inherit inputs;
+          pkgs-unstable = import inputs.nixpkgs-unstable {
+            system = "x86_64-linux";
+            config.allowUnfree = true;
+          };
+        };
         modules = [ ./hosts/grumpy/configuration.nix ];
       };
     };

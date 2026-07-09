@@ -90,14 +90,7 @@
     # Odin
     odin
 
-    # Upstream nanocoder Nix package (1.24.1) ships only dist/ but dist/config/themes.js
-    # reads source/config/themes.json at runtime via a relative path, crashing before any
-    # output. Patch postInstall to also copy source/ until upstream fixes packaging.
-    (inputs.nanocoder.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
-      postInstall = (old.postInstall or "") + ''
-        cp -r source $out/lib/nanocoder/
-      '';
-    }))
+    opencode
     inputs.claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
     playwright-mcp
 
@@ -381,6 +374,11 @@
       enable = true;
       autoLoad = true;
     };
+    nixpkgs.config.allowUnfreePredicate =
+      pkg:
+      builtins.elem (lib.getName pkg) [
+        "transparent.nvim"
+      ];
 
     # Treesitter (syntax highlighting, indentation, text objects)
     plugins.treesitter = {
@@ -414,6 +412,25 @@
         html.enable = true;
         pyright.enable = true;
         ols.enable = true;
+        # British spelling + grammar for prose. harper-ls is a self-contained
+        # Rust binary with a bundled dictionary, so no native-spell .spl download
+        # into the read-only nix store (the usual NixOS spell-check headache).
+        harper_ls = {
+          enable = true;
+          # Restrict to prose filetypes; harper lints code comments by default.
+          filetypes = [
+            "markdown"
+            "text"
+            "gitcommit"
+          ];
+          settings = {
+            "harper-ls" = {
+              # "British" is a real dialect, not just an en_GB wordlist —
+              # it knows British grammar/style conventions.
+              dialect = "British";
+            };
+          };
+        };
       };
       keymaps = {
         lspBuf = {
@@ -528,6 +545,11 @@
         mode = "n";
         key = "<leader>4";
         action.__raw = "function() require'harpoon':list():select(4) end";
+      }
+      {
+        mode = "n";
+        key = "<leader>5";
+        action.__raw = "function() require'harpoon':list():select(5) end";
       }
     ];
   };
