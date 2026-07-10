@@ -201,6 +201,34 @@
   environment.systemPackages = with pkgs; [
     lm_sensors # Heat Sensors
     wireguard-tools
+
+    # Terminal utilities — every host, incl. ones without home-manager
+    gh # Github cli
+    lftp # sftp
+    ffmpeg
+    openssl
+    xxd
+    wget
     ripgrep # fzf default command + telescope live_grep
+    dnsutils # dig, nslookup
+    whois
+    traceroute
+    nmap
+    tree
+    jq
+    unzip
+    zip
+    file
+    lsof
+    strace
+    btop
+    acpi # Battery viewer
+    cloc # Count lines of code
+    glow # Terminal markdown reader
+    ncdu # Disk usage analysis
+    tt # Typespeed test
+    fastfetch # New neofetch
+    cpufetch
+    nixfmt # nixvim needs it in PATH: nil_ls formatting + format-on-save
   ];
 }

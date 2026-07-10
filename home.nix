@@ -32,46 +32,20 @@
     slack
     stripe-cli
     satisfactorymodmanager
-    gh # Github cli
-    lftp # sftp
-    ffmpeg
-    openssl
-    xxd
 
     nerd-fonts.fira-code # Font
 
     openvpn
-    nmap
     gobuster
     thc-hydra
 
     # Utils
-    wget
     cdrkit
-    ripgrep
-    dnsutils # dig, nslookup
-    whois
-    traceroute
-    tree
-    jq
-    unzip
-    zip
-    file
-    lsof
-    strace
     mullvad-vpn
     feh
     pamixer # Audio Mixer
     mpv # Video player
-    btop
-    acpi # Battery viewer
-    cloc # Count lines of code
-    glow # Terminal markdown reader
-    ncdu # Disk usage analysis
-    tt # Typespeed test
     evince # pdf reader
-    fastfetch # New neofetch
-    cpufetch
     qemu # VMs
     quickemu # VM tools
     inputs.nopswd.packages.${pkgs.stdenv.hostPlatform.system}.default # Password manager
@@ -80,8 +54,6 @@
     # Programming Languages, tools, etc
     sqlite
     reflex # Reload on change
-    # Nix
-    nixfmt # Extra formatter for nix, not included in nil_ls
     # Go
     go
     # JS/Node
