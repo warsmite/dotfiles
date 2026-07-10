@@ -26,8 +26,11 @@
   # Remote rebuilds
   security.sudo.wheelNeedsPassword = false;
 
-  # Bluetooth (bluetoothctl — no GUI applet)
-  hardware.bluetooth.enable = true;
+  # Bluetooth unused on this TTY writing machine — off to save power.
+  hardware.bluetooth.enable = false;
+
+  # NMI watchdog is useless here and just adds timer wakeups.
+  boot.kernel.sysctl."kernel.nmi_watchdog" = 0;
 
   # Power management (laptop). Battery is worn (~46% of design capacity),
   # so cap charge at 80% to slow further wear. Only BAT1 exists on this unit.
@@ -37,6 +40,12 @@
     settings = {
       START_CHARGE_THRESH_BAT1 = 75;
       STOP_CHARGE_THRESH_BAT1 = 80;
+
+      WIFI_PWR_ON_BAT = "on";
+      SOUND_POWER_SAVE_ON_BAT = 1;
+      PCIE_ASPM_ON_BAT = "powersupersave";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+      PLATFORM_PROFILE_ON_BAT = "low-power";
     };
   };
 
