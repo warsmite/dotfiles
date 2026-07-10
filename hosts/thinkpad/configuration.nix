@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   imports = [
@@ -24,41 +24,16 @@
   # Remote rebuilds
   security.sudo.wheelNeedsPassword = false;
 
-  # Bluetooth
+  # Bluetooth (bluetoothctl — no GUI applet)
   hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
 
-  # Hyprland
-  programs.hyprland = {
-    enable = true;
-    withUWSM = true;
-    xwayland.enable = true;
-  };
-
-  # Login prompt (no autologin)
-  services.greetd = {
-    enable = true;
-    settings.default_session = {
-      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd hyprland";
-      user = "greeter";
-    };
-  };
-
-  # Home Manager
-  home-manager = {
-    extraSpecialArgs = { inherit inputs; };
-
-    users = {
-      "warsmite" =
-        { ... }:
-        {
-          imports = [
-            ./home.nix
-            ../../home.nix
-          ];
-        };
-    };
-  };
+  # Terminal-only writing machine: no compositor, no home-manager.
+  # These are stock, unconfigured — the nixvim/tmux setup lives in home.nix
+  # and is not pulled in here.
+  environment.systemPackages = with pkgs; [
+    neovim
+    tmux
+  ];
 
   system.stateVersion = "25.11";
 }

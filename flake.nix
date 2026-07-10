@@ -56,10 +56,7 @@
 
       nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
         specialArgs = { inherit inputs; };
-        modules = [
-          ./hosts/thinkpad/configuration.nix
-          inputs.home-manager.nixosModules.home-manager
-        ];
+        modules = [ ./hosts/thinkpad/configuration.nix ];
       };
 
       # Servers
