@@ -1,9 +1,12 @@
-{ pkgs, ... }:
+{ inputs, ... }:
 
 {
   imports = [
     ./hardware-configuration.nix
     ../../common.nix
+    # Full nixvim setup without home-manager (nixvim's NixOS module)
+    inputs.nixvim.nixosModules.nixvim
+    ../../nixvim.nix
   ];
 
   # Boot
@@ -14,6 +17,7 @@
   networking.hostName = "thinkpad";
   networking.networkmanager.enable = true;
   systemd.services.NetworkManager-wait-online.enable = false; # Faster boot
+  services.mullvad-vpn.enable = true;
 
   # SSH
   services.openssh.enable = true;
@@ -28,12 +32,7 @@
   hardware.bluetooth.enable = true;
 
   # Terminal-only writing machine: no compositor, no home-manager.
-  # These are stock, unconfigured — the nixvim/tmux setup lives in home.nix
-  # and is not pulled in here.
-  environment.systemPackages = with pkgs; [
-    neovim
-    tmux
-  ];
+  # nixvim comes from ../../nixvim.nix, tmux/bash/fzf from common.nix.
 
   system.stateVersion = "25.11";
 }
