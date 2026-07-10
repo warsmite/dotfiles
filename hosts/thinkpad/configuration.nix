@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports = [
@@ -35,9 +35,13 @@
     xwayland.enable = true;
   };
 
-  # Autologin
+  # Login prompt (no autologin)
   services.greetd = {
     enable = true;
+    settings.default_session = {
+      command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd hyprland";
+      user = "greeter";
+    };
   };
 
   # Home Manager
