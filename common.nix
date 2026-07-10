@@ -86,6 +86,11 @@
       set -g @extrakto_copy_key 'tab'
       set -g @extrakto_insert_key 'enter'
 
+      # Battery segment appended after the session name on the right. tmux
+      # re-runs #(...) every status-interval; tmux-battery is silent on hosts
+      # without a battery, so this is a no-op on desktops/servers.
+      set -g @minimal-tmux-status-right-extra ' #(tmux-battery)'
+
       # Wayland clipboard wiring — skipped on TTY-only hosts (thinkpad),
       # where wl-copy has no display to talk to
       if-shell '[ -n "$WAYLAND_DISPLAY" ]' {
@@ -110,6 +115,7 @@
       set -g focus-events on
       set -g history-limit 50000
       set -g renumber-windows on
+      set -g status-interval 15 # Refresh status bar (battery) every 15s
 
       # Pane borders (Catppuccin)
       set -g pane-border-style 'fg=#313244'
@@ -228,6 +234,36 @@
     strace
     btop
     acpi # Battery viewer
+    (writeShellScriptBin "tmux-battery" ''
+      # Compact battery segment for the tmux status bar. Silent on desktops
+      # and servers — acpi -b prints nothing when there is no battery.
+      bat=$(acpi -b 2>/dev/null | head -1)
+      [ -z "$bat" ] && exit 0
+
+      state=$(printf '%s' "$bat" | sed -E 's/^Battery [0-9]+: ([^,]+),.*/\1/')
+      pct=$(printf '%s' "$bat" | grep -oE '[0-9]+%' | head -1)
+      hms=$(printf '%s' "$bat" | grep -oE '[0-9]{2}:[0-9]{2}:[0-9]{2}' | head -1)
+      hm=$(printf '%s' "$hms" | cut -d: -f1,2)   # HH:MM, seconds dropped
+      num=$(printf '%s' "$pct" | tr -d '%')
+
+      case "$state" in
+        Discharging) sym=BAT ;;
+        Charging)    sym=CHG ;;
+        *)           sym=AC  ;;
+      esac
+
+      # Turn red (Catppuccin colour1) when low and unplugged.
+      color=""; reset=""
+      if [ "$state" = Discharging ] && [ "''${num:-100}" -le 15 ]; then
+        color="#[fg=colour1]"; reset="#[default]"
+      fi
+
+      if [ -n "$hm" ]; then
+        printf '%s%s %s %s%s' "$color" "$sym" "$pct" "$hm" "$reset"
+      else
+        printf '%s%s %s%s' "$color" "$sym" "$pct" "$reset"
+      fi
+    '')
     cloc # Count lines of code
     glow # Terminal markdown reader
     ncdu # Disk usage analysis
