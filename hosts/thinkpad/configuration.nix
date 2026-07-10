@@ -68,18 +68,23 @@
     };
   };
 
-  # On the Linux console, Alt+Left/Right are kernel VT-switch shortcuts
-  # (Decr_Console/Incr_Console) — they never reach tmux. Remap alt and
-  # shift+alt arrows to xterm-style escape sequences so tmux sees M-arrows.
-  # Ctrl+Alt+Fn still switches VTs.
-  systemd.services.console-alt-arrows = {
-    description = "Remap console Alt+arrows from VT switching to tmux-readable escape sequences";
+  # Console keymap overrides:
+  #  - Alt+Left/Right on the Linux console are kernel VT-switch shortcuts
+  #    (Decr_Console/Incr_Console) and never reach tmux. Remap alt and
+  #    shift+alt arrows to xterm-style escape sequences so tmux sees M-arrows.
+  #    Ctrl+Alt+Fn still switches VTs.
+  #  - Caps Lock -> Space: stopgap for a failing spacebar (dome/membrane
+  #    contact is intermittent). Caps is unused here; remove once the
+  #    keyboard is repaired/replaced.
+  systemd.services.console-keymap = {
+    description = "Console keymap overrides (tmux-readable Alt+arrows, Caps Lock as Space)";
     wantedBy = [ "multi-user.target" ];
     after = [ "systemd-vconsole-setup.service" ];
     serviceConfig = {
       Type = "oneshot";
       RemainAfterExit = true;
-      ExecStart = "${pkgs.kbd}/bin/loadkeys ${pkgs.writeText "alt-arrows.map" ''
+      ExecStart = "${pkgs.kbd}/bin/loadkeys ${pkgs.writeText "console.map" ''
+        keycode 58 = space
         alt keycode 103 = F100
         alt keycode 105 = F101
         alt keycode 106 = F102
