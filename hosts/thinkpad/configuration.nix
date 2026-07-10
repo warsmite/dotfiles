@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, pkgs, ... }:
 
 {
   imports = [
@@ -21,9 +21,7 @@
 
   # SSH
   services.openssh.enable = true;
-  # TEMP: password auth enabled to transfer keys to a fresh install.
-  # Flip to false once ~/.ssh/authorized_keys is in place.
-  services.openssh.settings.PasswordAuthentication = true;
+  services.openssh.settings.PasswordAuthentication = false;
 
   # Remote rebuilds
   security.sudo.wheelNeedsPassword = false;
@@ -31,8 +29,17 @@
   # Bluetooth (bluetoothctl — no GUI applet)
   hardware.bluetooth.enable = true;
 
-  # Terminal-only writing machine: no compositor, no home-manager.
-  # nixvim comes from ../../nixvim.nix, tmux/bash/fzf from common.nix.
+  # Git identity (home-manager's job on the other machines)
+  programs.git.config = {
+    user.name = "warsmite";
+    user.email = "warsmite@proton.me";
+    push.autoSetupRemote = true;
+    init.defaultBranch = "master";
+  };
+
+  environment.systemPackages = [
+    inputs.claude-code.packages.${pkgs.stdenv.hostPlatform.system}.default
+  ];
 
   system.stateVersion = "25.11";
 }
