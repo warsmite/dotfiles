@@ -29,6 +29,17 @@
   # Bluetooth (bluetoothctl — no GUI applet)
   hardware.bluetooth.enable = true;
 
+  # Power management (laptop). Battery is worn (~46% of design capacity),
+  # so cap charge at 80% to slow further wear. Only BAT1 exists on this unit.
+  services.thermald.enable = true;
+  services.tlp = {
+    enable = true;
+    settings = {
+      START_CHARGE_THRESH_BAT1 = 75;
+      STOP_CHARGE_THRESH_BAT1 = 80;
+    };
+  };
+
   # On the Linux console, Alt+Left/Right are kernel VT-switch shortcuts
   # (Decr_Console/Incr_Console) — they never reach tmux. Remap alt and
   # shift+alt arrows to xterm-style escape sequences so tmux sees M-arrows.
