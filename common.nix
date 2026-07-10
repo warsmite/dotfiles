@@ -98,7 +98,12 @@
     extraConfig = ''
       # Terminal & color
       set -g default-terminal "tmux-256color"
-      set -sa terminal-features ',xterm-256color:RGB'
+      # Only advertise 24-bit colour where a compositor backs it. On bare-TTY
+      # hosts (thinkpad) the Linux console is 16-colour, so advertising RGB
+      # just makes truecolor themes dither to mud.
+      if-shell '[ -n "$WAYLAND_DISPLAY" ]' {
+        set -sa terminal-features ',xterm-256color:RGB'
+      }
 
       # General
       set -g mouse on

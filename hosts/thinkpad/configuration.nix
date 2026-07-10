@@ -29,6 +29,25 @@
   # Bluetooth unused on this TTY writing machine — off to save power.
   hardware.bluetooth.enable = false;
 
+  # Console readability (bare TTY): a larger font for the 1366x768 panel and
+  # a 16-colour Catppuccin Mocha palette, so themes render through crisp,
+  # high-contrast colours instead of the muddy kernel default. Index 0 is the
+  # dark base (background), 7/15 are light text (foreground).
+  console = {
+    earlySetup = true;
+    font = "ter-v24n";
+    packages = [ pkgs.terminus_font ];
+    colors = [
+      "1e1e2e" "f38ba8" "a6e3a1" "f9e2af" "89b4fa" "f5c2e7" "94e2d5" "bac2de"
+      "585b70" "f38ba8" "a6e3a1" "f9e2af" "89b4fa" "f5c2e7" "94e2d5" "a6adc8"
+    ];
+  };
+
+  # The Linux console is 16-colour only. Force nvim to render Catppuccin
+  # through the palette above instead of dithering 24-bit down to mud.
+  # Scoped to this host — the graphical hosts share nixvim.nix and keep truecolor.
+  programs.nixvim.opts.termguicolors = false;
+
   # NMI watchdog is useless here and just adds timer wakeups.
   boot.kernel.sysctl."kernel.nmi_watchdog" = 0;
 
