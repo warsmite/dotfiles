@@ -38,8 +38,22 @@
     font = "ter-v24n";
     packages = [ pkgs.terminus_font ];
     colors = [
-      "1e1e2e" "f38ba8" "a6e3a1" "f9e2af" "89b4fa" "f5c2e7" "94e2d5" "bac2de"
-      "585b70" "f38ba8" "a6e3a1" "f9e2af" "89b4fa" "f5c2e7" "94e2d5" "a6adc8"
+      "1e1e2e"
+      "f38ba8"
+      "a6e3a1"
+      "f9e2af"
+      "89b4fa"
+      "f5c2e7"
+      "94e2d5"
+      "bac2de"
+      "585b70"
+      "f38ba8"
+      "a6e3a1"
+      "f9e2af"
+      "89b4fa"
+      "f5c2e7"
+      "94e2d5"
+      "a6adc8"
     ];
   };
 
@@ -51,19 +65,14 @@
   # NMI watchdog is useless here and just adds timer wakeups.
   boot.kernel.sysctl."kernel.nmi_watchdog" = 0;
 
-  # Power management (laptop). Battery is worn (~46% of design capacity),
-  # so cap charge at 80% to slow further wear. Only BAT1 exists on this unit.
   services.thermald.enable = true;
   services.tlp = {
     enable = true;
     settings = {
-      START_CHARGE_THRESH_BAT1 = 75;
-      STOP_CHARGE_THRESH_BAT1 = 80;
-
       WIFI_PWR_ON_BAT = "on";
       SOUND_POWER_SAVE_ON_BAT = 1;
       PCIE_ASPM_ON_BAT = "powersupersave";
-      CPU_ENERGY_PERF_POLICY_ON_BAT = "power";
+      CPU_ENERGY_PERF_POLICY_ON_BAT = "balance_power";
       PLATFORM_PROFILE_ON_BAT = "low-power";
     };
   };
