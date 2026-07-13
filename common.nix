@@ -233,6 +233,7 @@
     lsof
     strace
     btop
+    termdown
     acpi # Battery viewer
     (writeShellScriptBin "tmux-battery" ''
       # Compact battery segment for the tmux status bar. Silent on desktops
