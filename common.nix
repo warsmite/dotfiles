@@ -86,10 +86,10 @@
       set -g @extrakto_copy_key 'tab'
       set -g @extrakto_insert_key 'enter'
 
-      # Battery segment appended after the session name on the right. tmux
+      # Battery + clock appended after the session name on the right. tmux
       # re-runs #(...) every status-interval; tmux-battery is silent on hosts
       # without a battery, so this is a no-op on desktops/servers.
-      set -g @minimal-tmux-status-right-extra ' #(tmux-battery)'
+      set -g @minimal-tmux-status-right-extra ' #(tmux-battery) %H:%M'
 
       # Wayland clipboard wiring — skipped on TTY-only hosts (thinkpad),
       # where wl-copy has no display to talk to
