@@ -169,6 +169,13 @@
 
       ## Zoom pane (toggle fullscreen)
       bind-key -n M-z resize-pane -Z
+
+      # Scrollback: kernels >= 5.9 dropped Linux-console scrollback
+      # (Shift+PgUp), so tmux copy-mode is the only scrollback on bare-TTY
+      # hosts. PgUp at a prompt would otherwise fall through to readline,
+      # which /etc/inputrc binds to beginning-of-history. Pass PgUp through
+      # untouched when a full-screen app (nvim, less) owns the pane.
+      bind-key -n PPage if-shell -F "#{alternate_on}" "send-keys PPage" "copy-mode -eu"
     '';
   };
 
