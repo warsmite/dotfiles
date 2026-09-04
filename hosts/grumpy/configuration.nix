@@ -11,6 +11,7 @@
     ./hardware-configuration.nix
     ../../common.nix
     inputs.hermes-agent.nixosModules.default
+    inputs.dzepoch.nixosModules.default
     #inputs.gamejanitor.nixosModules.default
   ];
 
@@ -91,6 +92,12 @@
     # Default heap is 2G (-Xmx2048M -Xms2048M); override here if needed.
     # jvmOpts = "-Xmx4096M -Xms4096M";
   };
+
+  # DayZ Epoch 1.0.7.1 server (Arma 2 OA under Wine) — module from
+  # ~/dev/dzepoch. Game data is fetched imperatively: run `sudo
+  # dayz-epoch-setup` on grumpy once (interactive Steam login). Opens UDP
+  # 2302-2305; server config lives in /var/lib/dayz-epoch/config/.
+  services.dayz-epoch.enable = true;
 
   # hermes's container mode enables docker; 25.11's default docker_28 is
   # marked insecure (unmaintained since Nov 2025). Overlay rather than

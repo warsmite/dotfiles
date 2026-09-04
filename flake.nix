@@ -19,6 +19,12 @@
     gjq.url = "github:warsmite/gjq";
     gamejanitor.url = "github:warsmite/GameJanitor";
 
+    # DayZ Epoch server for grumpy. Local path input while the repo only lives
+    # on this machine (switch to github:warsmite/dzepoch if pushed) — path
+    # inputs are pinned in flake.lock, so run `nix flake update dzepoch` here
+    # after changing ~/dev/dzepoch, then rebuild.
+    dzepoch.url = "path:/home/warsmite/dev/dzepoch";
+
     claude-code.url = "github:sadjow/claude-code-nix";
 
     # Pinned to a release tag — main's web/tui npm builds were broken

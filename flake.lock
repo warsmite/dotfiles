@@ -40,6 +40,18 @@
         "type": "github"
       }
     },
+    "dzepoch": {
+      "locked": {
+        "lastModified": 1788562582,
+        "narHash": "sha256-SwEmZ+7LcX5wXoMgOqtG8dnB5ov1LMhIcLcy9Y0GXSY=",
+        "path": "/home/warsmite/dev/dzepoch",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/warsmite/dev/dzepoch",
+        "type": "path"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -688,6 +700,7 @@
       "inputs": {
         "chaotic": "chaotic",
         "claude-code": "claude-code",
+        "dzepoch": "dzepoch",
         "gamejanitor": "gamejanitor",
         "gjq": "gjq",
         "hermes-agent": "hermes-agent",
