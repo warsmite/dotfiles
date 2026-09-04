@@ -42,8 +42,8 @@
     },
     "dzepoch": {
       "locked": {
-        "lastModified": 1788563346,
-        "narHash": "sha256-NwVhtyOKjezv4+atF6ndm08/BsRcEfrZriRK2t5JEdE=",
+        "lastModified": 1788564250,
+        "narHash": "sha256-FtQZVx/IWNYq0slWi1/oXDFe12wc0OHHm9jX5fzTbAY=",
         "path": "/home/warsmite/dev/dzepoch",
         "type": "path"
       },
