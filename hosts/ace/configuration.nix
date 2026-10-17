@@ -227,6 +227,74 @@
     # Game streaming client (Windows PC runs Sunshine as host)
     moonlight-qt
 
+    # GeForce NOW launcher that keeps the stream outside the Mullvad tunnel.
+    # Used by the com.nvidia.geforcenow desktop entry in hosts/ace/home.nix —
+    # changing the name here requires updating that entry's exec.
+    (writeShellScriptBin "geforcenow-excluded" ''
+      set -euo pipefail
+
+      APP_ID="com.nvidia.geforcenow"
+      SCOPE_GLOB="/sys/fs/cgroup/user.slice/user-$(id -u).slice/user@$(id -u).service/app.slice/app-flatpak-$APP_ID-*.scope"
+      POLL_SECONDS=2
+      STARTUP_TIMEOUT_SECONDS=30
+
+      log() {
+        printf '[geforcenow-exclude] %s\n' "$*" >&2
+      }
+
+      # Prefixing this with mullvad-exclude does not work. flatpak hands the app
+      # off to the systemd user session, which puts it in its own
+      # app-flatpak-*.scope and resets net_cls to /, discarding the
+      # mullvad-exclusions membership mullvad-exclude set on the launcher. So
+      # launch normally and re-apply the exclusion per-PID after the handoff.
+      flatpak run --branch=master --arch=x86_64 --command=GeForceNOW "$APP_ID" &
+      launcher_pid=$!
+      log "launched flatpak (pid $launcher_pid), waiting for app scope"
+
+      excluded_pids=" "
+      scope_seen=0
+      waited_seconds=0
+
+      while true; do
+        # SCOPE_GLOB is deliberately unquoted — the scope name ends in a
+        # systemd-assigned number that has to glob.
+        scope_pids="$(cat $SCOPE_GLOB/cgroup.procs 2>/dev/null || true)"
+
+        if [ -z "$scope_pids" ]; then
+          if [ "$scope_seen" -eq 1 ]; then
+            log "app scope is gone, GeForce NOW has exited"
+            exit 0
+          fi
+
+          waited_seconds=$((waited_seconds + POLL_SECONDS))
+          if [ "$waited_seconds" -ge "$STARTUP_TIMEOUT_SECONDS" ]; then
+            log "ERROR: no app scope after $STARTUP_TIMEOUT_SECONDS seconds - traffic is NOT excluded from the VPN"
+            exit 1
+          fi
+        else
+          scope_seen=1
+
+          # CEF spawns helper processes throughout startup, so keep sweeping the
+          # scope rather than excluding once. PIDs forked after their parent is
+          # excluded inherit the cgroup, but the early ones race the handoff.
+          for pid in $scope_pids; do
+            case "$excluded_pids" in
+              *" $pid "*) continue ;;
+            esac
+
+            if mullvad split-tunnel add "$pid" > /dev/null; then
+              excluded_pids="$excluded_pids$pid "
+              log "excluded pid $pid from the tunnel"
+            else
+              log "WARNING: failed to exclude pid $pid from the tunnel"
+            fi
+          done
+        fi
+
+        sleep "$POLL_SECONDS"
+      done
+    '')
+
     # Monero
     monero-gui
 
@@ -247,6 +315,17 @@
   programs.steam.gamescopeSession.enable = true;
   programs.gamemode.enable = true;
   programs.gamescope.enable = true;
+
+  ## GeForce NOW
+  # NVIDIA ships the native Linux client only as a Flatpak from their own repo
+  # (not on Flathub, not in nixpkgs), so Flatpak is enabled solely for this.
+  # Flathub is still required for the runtimes the app pulls in. One-time setup:
+  #   flatpak remote-add --user --if-not-exists GeForceNOW https://international.download.nvidia.com/GFNLinux/flatpak/geforcenow.flatpakrepo
+  #   flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+  #   flatpak install --user GeForceNOW com.nvidia.geforcenow
+  # services.flatpak asserts on xdg.portal.enable, which programs.hyprland
+  # above already sets — no separate portal config needed here.
+  services.flatpak.enable = true;
 
   # Home Manager
   home-manager = {

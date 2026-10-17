@@ -1,4 +1,4 @@
-{ lib, ... }:
+{ lib, pkgs, ... }:
 
 {
   my.hyprland.enable = true;
@@ -121,4 +121,26 @@
       comment = "Voice, Video and Text Chat";
     };
   };
+
+  # GeForce NOW cannot use xdg.desktopEntries like the launchers above. Home
+  # Manager exports those into the user profile, which sits behind flatpak's own
+  # exports in XDG_DATA_DIRS, so flatpak's entry — which launches the app
+  # unexcluded — wins. XDG_DATA_HOME is searched ahead of every XDG_DATA_DIRS
+  # entry, so writing it here is what actually overrides flatpak's launcher.
+  home.file.".local/share/applications/com.nvidia.geforcenow.desktop".source =
+    "${pkgs.makeDesktopItem {
+      name = "com.nvidia.geforcenow";
+      desktopName = "NVIDIA GeForce NOW";
+      genericName = "Cloud Gaming Client";
+      comment = "Stream games from NVIDIA's cloud";
+      icon = "com.nvidia.geforcenow";
+      categories = [
+        "Network"
+        "Game"
+      ];
+      # Not mullvad-exclude: flatpak re-parents the app into its own systemd
+      # scope, which resets net_cls and drops the exclusion. geforcenow-excluded
+      # (hosts/ace/configuration.nix) re-applies it after that handoff.
+      exec = "geforcenow-excluded";
+    }}/share/applications/com.nvidia.geforcenow.desktop";
 }
