@@ -91,7 +91,7 @@
       # without a battery, so this is a no-op on desktops/servers.
       set -g @minimal-tmux-status-right-extra ' #(tmux-battery) %H:%M'
 
-      # Wayland clipboard wiring — skipped on TTY-only hosts (thinkpad),
+      # Wayland clipboard wiring — skipped without a compositor (servers, SSH),
       # where wl-copy has no display to talk to
       if-shell '[ -n "$WAYLAND_DISPLAY" ]' {
         set -g @extrakto_clip_tool 'wl-copy'
@@ -104,7 +104,7 @@
       # Terminal & color
       set -g default-terminal "tmux-256color"
       # Only advertise 24-bit colour where a compositor backs it. On bare-TTY
-      # hosts (thinkpad) the Linux console is 16-colour, so advertising RGB
+      # hosts the Linux console is 16-colour, so advertising RGB
       # just makes truecolor themes dither to mud.
       if-shell '[ -n "$WAYLAND_DISPLAY" ]' {
         set -sa terminal-features ',xterm-256color:RGB'
