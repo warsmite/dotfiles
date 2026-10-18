@@ -8,6 +8,9 @@
   wayland.windowManager.hyprland.settings = {
     monitor = [ "eDP-1,1366x768,auto,1" ];
 
+    # Hide the cursor while typing; it comes back on mouse movement
+    cursor.hide_on_key_press = true;
+
     # Brightness keys (Fn+F5/F6)
     bindel = [
       ", XF86MonBrightnessDown, exec, brightnessctl set 5%-"
