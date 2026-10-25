@@ -1,8 +1,6 @@
-# Shared nixvim configuration. Imported two ways:
-#   - home.nix (home-manager module) on desktops
-#   - hosts/thinkpad/configuration.nix (NixOS module) — no home-manager there
-# The importing side must also import the matching nixvim module
-# (inputs.nixvim.homeModules.nixvim or inputs.nixvim.nixosModules.nixvim).
+# Shared nixvim configuration, imported by home.nix (home-manager module).
+# Can also be used as a NixOS module (inputs.nixvim.nixosModules.nixvim)
+# on hosts without home-manager.
 { lib, ... }:
 
 {
@@ -140,7 +138,7 @@
     };
     extraConfigLua = ''
       -- Sync yanks with the system clipboard only under Wayland; on a bare
-      -- TTY (thinkpad) the wl-copy provider errors on every yank.
+      -- TTY or over SSH the wl-copy provider errors on every yank.
       if vim.env.WAYLAND_DISPLAY then
         vim.opt.clipboard = "unnamedplus"
       end

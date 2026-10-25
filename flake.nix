@@ -70,6 +70,7 @@
         modules = [
           ./hosts/thinkpad/configuration.nix
           inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x270
+          inputs.home-manager.nixosModules.home-manager
         ];
       };
 
