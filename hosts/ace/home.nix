@@ -100,6 +100,17 @@
       genericName = "Minecraft Launcher";
       comment = "A custom launcher for Minecraft";
     };
+    # Battlefield 2 lives in a plain Wine prefix on /data, not Lutris. The
+    # launcher script does the mullvad-exclude itself.
+    battlefield2-bf2hub = {
+      name = "Battlefield 2 (BF2Hub)";
+      exec = "/data/games/battlefield2/launch-bf2hub.sh";
+      icon = "lutris";
+      terminal = false;
+      categories = [ "Game" ];
+      genericName = "Battlefield 2";
+      comment = "Battlefield 2 via the BF2Hub client under Wine";
+    };
     "com.moonlight_stream.Moonlight" = {
       name = "Moonlight";
       exec = "mullvad-exclude moonlight %U";

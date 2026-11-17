@@ -1,4 +1,4 @@
-{ inputs, pkgs, ... }:
+{ inputs, pkgs, pkgs-unstable, ... }:
 
 {
   imports = [
@@ -43,6 +43,22 @@
     };
   };
 
+  # Suspend-then-hibernate on lid close: instant resume for short breaks, zero
+  # drain after that. Plain suspend flattens the worn battery (~21Wh left) in
+  # a couple of days.
+  services.logind.settings.Login = {
+    HandleLidSwitch = "suspend-then-hibernate";
+    HandleLidSwitchExternalPower = "suspend-then-hibernate";
+  };
+
+  systemd.sleep.extraConfig = ''
+    HibernateDelaySec=30min
+  '';
+
+  # Swap partition from hardware-configuration.nix (7.5G vs 7.7G RAM — enough,
+  # the hibernate image is compressed and capped well below total RAM).
+  boot.resumeDevice = "/dev/disk/by-uuid/c553be6c-93aa-41ca-8f65-35470e79932b";
+
   # NMI watchdog is useless here and just adds timer wakeups.
   boot.kernel.sysctl."kernel.nmi_watchdog" = 0;
 
@@ -63,7 +79,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "hm-backup";
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = { inherit inputs pkgs-unstable; };
 
     users = {
       "warsmite" =

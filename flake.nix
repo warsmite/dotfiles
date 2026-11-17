@@ -27,9 +27,11 @@
 
     claude-code.url = "github:sadjow/claude-code-nix";
 
-    # Pinned to a release tag — main's web/tui npm builds were broken
-    # (ENOTCACHED on @nous-research/ui) as of 2026-08-01
-    hermes-agent.url = "github:NousResearch/hermes-agent/v2026.7.30";
+    # Pinned to a release tag — upstream calls Nix a best-effort Tier 2 platform
+    # and main can break the flake at any time. Tags switched from vYYYY.M.D to
+    # v0.x.y after v2026.9.24. Bump deliberately: `nix flake update` alone does
+    # not move a tag pin.
+    hermes-agent.url = "github:NousResearch/hermes-agent/v0.22.5";
 
     nix-citizen.url = "github:LovingMelody/nix-citizen";
     nix-gaming.url = "github:fufexan/nix-gaming";
@@ -40,10 +42,16 @@
 
   outputs =
     { self, nixpkgs, ... }@inputs:
+    let
+      pkgs-unstable = import inputs.nixpkgs-unstable {
+        system = "x86_64-linux";
+        config.allowUnfree = true;
+      };
+    in
     {
       # User machines
       nixosConfigurations.chuwi = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           ./hosts/chuwi/configuration.nix
           inputs.home-manager.nixosModules.home-manager
@@ -51,13 +59,7 @@
       };
 
       nixosConfigurations.ace = nixpkgs.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs;
-          pkgs-unstable = import inputs.nixpkgs-unstable {
-            system = "x86_64-linux";
-            config.allowUnfree = true;
-          };
-        };
+        specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           ./hosts/ace/configuration.nix
           inputs.home-manager.nixosModules.home-manager
@@ -66,7 +68,7 @@
       };
 
       nixosConfigurations.thinkpad = nixpkgs.lib.nixosSystem {
-        specialArgs = { inherit inputs; };
+        specialArgs = { inherit inputs pkgs-unstable; };
         modules = [
           ./hosts/thinkpad/configuration.nix
           inputs.nixos-hardware.nixosModules.lenovo-thinkpad-x270
@@ -91,13 +93,7 @@
       };
 
       nixosConfigurations.grumpy = nixpkgs.lib.nixosSystem {
-        specialArgs = {
-          inherit inputs;
-          pkgs-unstable = import inputs.nixpkgs-unstable {
-            system = "x86_64-linux";
-            config.allowUnfree = true;
-          };
-        };
+        specialArgs = { inherit inputs pkgs-unstable; };
         modules = [ ./hosts/grumpy/configuration.nix ];
       };
     };

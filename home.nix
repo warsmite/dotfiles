@@ -1,5 +1,6 @@
 {
   pkgs,
+  pkgs-unstable,
   lib,
   inputs,
   ...
@@ -28,7 +29,10 @@
     chromium
     signal-desktop
     telegram-desktop
-    discord
+    # Unstable: Discord's web app updates independently of the host and drops
+    # support for old hosts (stable's 0.0.130 could no longer decode H.264
+    # streams once the web app replaced its OpenH264 library).
+    pkgs-unstable.discord
     slack
     stripe-cli
     satisfactorymodmanager

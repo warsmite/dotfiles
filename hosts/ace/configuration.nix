@@ -19,10 +19,21 @@
   # Boot
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  # Memtest86+ entry in the boot menu. The crash history since April 2026 is
+  # random kernel memory corruption (GPFs on non-canonical pointers, bad page
+  # state, list corruption) across unrelated subsystems and four kernel
+  # versions, which points at RAM/memory controller rather than software.
+  boot.loader.systemd-boot.memtest86.enable = true;
   boot.kernelParams = [
     "amdgpu.cwsr_enable=0" # Workaround for MES hang on Strix Point
     "amdgpu.mes_log_enable=1" # Enable MES logging for GPU crash diagnosis
     "mitigations=off" # Disable CPU security mitigations for performance
+    # The CachyOS kernel builds efi_pstore with
+    # CONFIG_EFI_VARS_PSTORE_DEFAULT_DISABLE=y, so panics were not being saved
+    # to EFI vars and systemd-pstore has had nothing to archive since the kernel
+    # switch. Several hard freezes left no trace in the journal; this captures
+    # the panic text into /var/lib/systemd/pstore/ on the next boot.
+    "efi_pstore.pstore_disable=0"
   ];
   boot.kernelPackages = pkgs.linuxPackages_cachyos; # CachyOS kernel for gaming
   hardware.firmware = [ pkgs.linux-firmware ];
@@ -194,6 +205,12 @@
     openjdk25
     prismlauncher # Unofficial Minecraft Launcher
 
+    # Battlefield 2 via BF2Hub (community GameSpy replacement) under Wine.
+    # The lutris desktop entry in hosts/ace/home.nix expects `lutris` on PATH.
+    lutris
+    wineWowPackages.stableFull # 64-bit Wine with 32-bit support and GStreamer; BF2 is a 32-bit game
+    winetricks
+
     ryzenadj # Manual TDP tuning: sudo ryzenadj --info
     amdgpu_top
     wlr-randr
@@ -332,7 +349,7 @@
     useGlobalPkgs = true;
     useUserPackages = true;
     backupFileExtension = "hm-backup";
-    extraSpecialArgs = { inherit inputs; };
+    extraSpecialArgs = { inherit inputs pkgs-unstable; };
 
     users = {
       "warsmite" =

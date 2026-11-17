@@ -110,8 +110,9 @@
     enable = true;
 
     # `messaging` variant: gateway + Telegram/Discord/Slack libs, but skips the
-    # web dashboard/TUI npm builds — hermes-web is broken upstream at this rev
-    # (npm ENOTCACHED on @nous-research/ui), and Telegram is the interface anyway.
+    # web dashboard/TUI npm builds. The web dashboard (backend.mode) is not
+    # supported together with container.enable anyway, and Telegram is the
+    # interface.
     package = inputs.hermes-agent.packages.${pkgs.stdenv.hostPlatform.system}.messaging;
 
     # Agent tool execution happens inside an Ubuntu container (persistent
@@ -123,9 +124,15 @@
     addToSystemPackages = true;
 
     # OpenRouter is selected by OPENROUTER_API_KEY in the secrets file.
-    # Swap models later with `hermes model` — nix settings are merged into
-    # config.yaml, not overwritten.
-    settings.model.default = "deepseek/deepseek-v4-flash-latest";
+    # The module writes a .managed marker that blocks CLI config saves, so
+    # change the model here and rebuild. Nix settings are deep-merged into
+    # config.yaml; keys the agent adds itself are preserved.
+    #
+    # Use an exact OpenRouter id: `deepseek/deepseek-v4-flash-latest` 404s on
+    # OpenRouter's model API (2026-10-28). Haiku 5.5 is $0.10/$0.50 per MTok
+    # with $0.01 cache reads; the gateway's long system prompt hits the cache
+    # at ~97%, so cache price matters more than list price here.
+    settings.model.default = "anthropic/claude-haiku-5.5";
 
     # Secrets live on the host, outside the repo and the nix store.
     # Missing file is skipped at activation, so first rebuild works before
